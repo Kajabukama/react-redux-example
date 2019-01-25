@@ -1,28 +1,29 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { fetchPost } from '../../actions/PostActions'
 
 class Posts extends Component {
-	state = {
-    posts: [],
-  }
 
-  componentWillMount(){
-    fetch('https://jsonplaceholder.typicode.com/posts')
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
-      this.setState({posts: data})
-    })
-  }
+	componentDidMount(){
+		this.props.fetchPost()
+	}
+	componentWillReceiveProps(nextProps){
+		if(nextProps.newPost){
+			this.props.posts.unshift(nextProps.newPost);
+		}
+	}
+
 	render() {
 
-		const PostItem = this.state.posts.map((item,index) => {
+		const PostItem = this.props.posts.map((item,index) => {
       return (
-        <div key={ item.id } className="col-md-4">
+        <div key={ index } className="col-md-3 mb-3">
 					<div className="card">
 						<img src={ thumb } className="card-img-top" alt="..."/>
 						<div className="card-body">
-							<h5 className="card-title">{ item.title }</h5>
-							<p className="card-text">{ item.body}</p>
+							<h5 className="card-title text-truncate">{ item.title }</h5>
+							<p className="card-text text-truncate">{ item.body}</p>
 						</div>
 					</div>
 				</div>
@@ -37,5 +38,16 @@ class Posts extends Component {
 	}
 }
 
-export default Posts;
+Posts.propTypes = {
+	posts: PropTypes.array.isRequired,
+	fetchPost: PropTypes.func.isRequired,
+	newPost: PropTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+	posts: state.posts.posts,
+	newPost: state.posts.post
+})
+
+export default connect(mapStateToProps, { fetchPost })(Posts);
 const thumb = require('./../../assets/imgs/thumb.jpg');
